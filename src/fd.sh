@@ -19,6 +19,7 @@ build_dir='build'                     # out-of-source cmake build dir
 clean='none'                          # clean executables and/or cmake cache
 tests='none'                          # make and/or run test driver
 quiet_mode='off'                      # silence all output except errors
+generate_new_project_config='false'   # gen new .project_config file
 
 print_usage() {
   echo 'USAGE:'
@@ -27,6 +28,7 @@ print_usage() {
   echo '            [-x <file>]  [-q]'
   echo "  $(basename "${0}")  -d|-r|-w|-m  [-c|-C]  [-t|-T]  [-b <dir>]"
   echo '            [-p <file>]  [-e <file>|-E]  [-x <file>]  [-q]'
+  echo "  $(basename "${0}")  -P  [-L|-V]"
   echo 'OPTIONS:'
   echo '  -h, --help'
   echo '      print this help message'
@@ -56,6 +58,8 @@ print_usage() {
   echo '      do not build program executable (override config file)'
   echo '  -x <file>, --test-driver-name=<file>'
   echo '      specify test-driver executable to build (override config file)'
+  echo '  -P, --generate-project-config'
+  echo '      generate template .project_config file'
   echo '  -q, --quiet-mode'
   echo '      quiet mode'
   exit "${1}"
@@ -68,7 +72,7 @@ print_error_msg() {
 }
 
 get_cmd_opts_and_args() {
-  while getopts ':hdrwmcCtTb:p:e:Ex:q-:' option; do
+  while getopts ':hdrwmcCtTb:p:e:Ex:Pq-:' option; do
     case "${option}" in
       h)  handle_help ;;
       d)  handle_build_type_debug ;;
@@ -84,6 +88,7 @@ get_cmd_opts_and_args() {
       e)  handle_executable_name "${OPTARG}" ;;
       E)  handle_no_build_executable ;;
       x)  handle_test_driver_name "${OPTARG}" ;;
+      P)  handle_generate_project_config ;;
       q)  handle_quiet_mode ;;
       -)  LONG_OPTARG="${OPTARG#*=}"
           case ${OPTARG} in
@@ -115,6 +120,8 @@ get_cmd_opts_and_args() {
             no-build-executable=*)  handle_illegal_option_arg "${OPTARG}" ;;
             test-driver-name=?*)    handle_test_driver_name "${LONG_OPTARG}" ;;
             test-driver-name*)      handle_missing_option_arg "${OPTARG}" ;;
+            generate-project-config)          handle_generate_project_config ;;
+            generate-project-config=*)        handle_illegal_option_arg "${OPTARG}" ;;
             quiet-mode)             handle_quiet_mode ;;
             quiet-mode=*)           handle_illegal_option_arg "${OPTARG}" ;;
             '')                     break ;; # non-option arg starting with '-'
@@ -194,6 +201,10 @@ handle_quiet_mode() {
   quiet_mode='on'
 }
 
+handle_generate_project_config() {
+  generate_new_project_config='true'
+}
+
 handle_unknown_option() {
   err_msg="unknown option \"${1}\""
   print_error_msg "${err_msg}" 1
@@ -207,6 +218,53 @@ handle_illegal_option_arg() {
 handle_missing_option_arg() {
   err_msg="missing argument for option \"${1}\""
   print_error_msg "${err_msg}" 1
+}
+
+generate_project_config() {
+  if [ -e '.project_config' ]; then
+    err_msg=".project_config file already exists"
+    print_error_msg "${err_msg}" 1
+  fi
+  cat <<- 'EOF' > .project_config
+# cmake project title
+my-project
+# cmake min version required
+3.12
+# language type:"C" or "CPP"
+CPP
+# language standard
+17
+# defs and system-include standards: space-separated, "-" if empty
+-DGNU_SOURCE -_LARGEFILE64_SOURCE
+# warning levels: space-separated, "-" if empty
+-Wall -Wno-unused
+# top-level src dirs: colon-separated
+src:third_party
+# src file with main-executable code: "-" if none, i.e. test only
+src/main.cpp
+# main executable file to build: "-" if none, i.e. test only
+my-exec
+# testing language type: "C" or "CPP" (N/A if building without -t/-T)
+CPP
+# testing language standard (N/A if building without -t/-T)
+17
+# testing top-level src dirs: colon-separated, "-" if none
+unit-tests:more-unit-tests
+# test-driver executable to build (N/A if building without -t/-T)
+my-test-driver
+# EOF: FILE MUST END WITH THIS LAST LINE
+EOF
+}
+
+generate_new_setup_files() {
+  setup_file_generated='false'
+  if [ "${generate_new_project_config}" = 'true' ]; then
+    generate_project_config
+    setup_file_generated='true'
+  fi
+  if [ "${setup_file_generated}" = 'true' ]; then
+    exit 0
+  fi
 }
 
 load_settings_from_project_config() {
@@ -294,6 +352,7 @@ move_execs() {
 }
 
 build_and_test() {
+  generate_new_setup_files
   load_settings_from_project_config
   clean_project
   check_build_type
