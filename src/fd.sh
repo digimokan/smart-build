@@ -1,14 +1,5 @@
 #!/bin/sh
 
-################################################################################
-# script:   build.sh
-# author:   digimokan
-# date:     10 AUG 2017 (created)
-# purpose:  automate simple CMake out-of-source builds
-# inputs:   specially-formatted .project_config file
-# usage:    see below usage() function
-################################################################################
-
 build_type='uninitialized'            # release, debug, etc.
 build_testing='uninitialized'         # build tests (on/off)
 executable_name='uninitialized'       # name of program main executable
