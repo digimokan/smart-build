@@ -12,6 +12,7 @@ tests='none'                          # make and/or run test driver
 quiet_mode='off'                      # silence all output except errors
 generate_new_project_config='false'   # gen new .project_config file
 generate_new_cmakelists='false'       # gen new CMakeLists.txt file
+generate_new_vimrc='false'            # gen new .vimrc file
 
 print_usage() {
   echo 'USAGE:'
@@ -22,6 +23,7 @@ print_usage() {
   echo '            [-p <file>]  [-e <file>|-E]  [-x <file>]  [-q]'
   echo "  $(basename "${0}")  -P  [-L|-V]"
   echo "  $(basename "${0}")  -L  [-P|-V]"
+  echo "  $(basename "${0}")  -V  [-P|-L]"
   echo 'OPTIONS:'
   echo '  -h, --help'
   echo '      print this help message'
@@ -55,6 +57,8 @@ print_usage() {
   echo '      generate template .project_config file'
   echo '  -L, --generate-cmakelists'
   echo '      generate template CMakeLists.txt file'
+  echo '  -V, --generate-vimrc'
+  echo '      generate template .vimrc file'
   echo '  -q, --quiet-mode'
   echo '      quiet mode'
   exit "${1}"
@@ -67,7 +71,7 @@ print_error_msg() {
 }
 
 get_cmd_opts_and_args() {
-  while getopts ':hdrwmcCtTb:p:e:Ex:PLq-:' option; do
+  while getopts ':hdrwmcCtTb:p:e:Ex:PLVq-:' option; do
     case "${option}" in
       h)  handle_help ;;
       d)  handle_build_type_debug ;;
@@ -85,6 +89,7 @@ get_cmd_opts_and_args() {
       x)  handle_test_driver_name "${OPTARG}" ;;
       P)  handle_generate_project_config ;;
       L)  handle_generate_cmakelists ;;
+      V)  handle_generate_vimrc ;;
       q)  handle_quiet_mode ;;
       -)  LONG_OPTARG="${OPTARG#*=}"
           case ${OPTARG} in
@@ -118,8 +123,10 @@ get_cmd_opts_and_args() {
             test-driver-name*)      handle_missing_option_arg "${OPTARG}" ;;
             generate-project-config)          handle_generate_project_config ;;
             generate-project-config=*)        handle_illegal_option_arg "${OPTARG}" ;;
-            generate-cmakelists)              handle_generate_cmakelists ;;
-            generate-cmakelists=*)            handle_illegal_option_arg "${OPTARG}" ;;
+            generate-cmakelists)    handle_generate_cmakelists ;;
+            generate-cmakelists=*)  handle_illegal_option_arg "${OPTARG}" ;;
+            generate-vimrc)         handle_generate_vimrc ;;
+            generate-vimrc=*)       handle_illegal_option_arg "${OPTARG}" ;;
             quiet-mode)             handle_quiet_mode ;;
             quiet-mode=*)           handle_illegal_option_arg "${OPTARG}" ;;
             '')                     break ;; # non-option arg starting with '-'
@@ -205,6 +212,10 @@ handle_generate_project_config() {
 
 handle_generate_cmakelists() {
   generate_new_cmakelists='true'
+}
+
+handle_generate_vimrc() {
+  generate_new_vimrc='true'
 }
 
 handle_unknown_option() {
@@ -475,6 +486,143 @@ endif()
 EOF
 }
 
+generate_vimrc() {
+  if [ -e '.vimrc' ]; then
+    err_msg=".vimrc file already exists"
+    print_error_msg "${err_msg}" 1
+  fi
+  cat <<- 'EOF' > .vimrc
+"*******************************************************************************
+" NOTE: MUST START VIM IN PROJECT ROOT!
+"*******************************************************************************
+
+let b:config_file_name     = '.project_config'
+let b:completion_file_name = '.clang_complete'
+let b:config_lines = {
+  \ 'lang_type'         : 5,
+  \ 'lang_std'          : 7,
+  \ 'testing_lang_type' : 19,
+  \ 'testing_lang_std'  : 21,
+  \ 'defs'              : 9,
+  \ 'warnings'          : 11,
+  \ 'src_dirs'          : 13,
+  \ 'testing_src_dirs'  : 23
+\ }
+let b:cpp_fallback_std = "11"
+let b:c_fallback_std   = "99"
+
+function! s:GetConfigCompileDefs(project_config, config_lines)
+  return (a:project_config[a:config_lines.defs] == "-")
+    \ ? ''
+    \ : a:project_config[a:config_lines.defs]
+endfunction
+
+function! s:GetConfigCompileWarnings(project_config, config_lines)
+  return (a:project_config[a:config_lines.warnings] == "-")
+    \ ? ''
+    \ : a:project_config[a:config_lines.warnings]
+endfunction
+
+function! s:GetConfigCPPCompileStd(project_config, config_lines)
+  let l:lang_type         = a:project_config[a:config_lines.lang_type]
+  let l:lang_std          = a:project_config[a:config_lines.lang_std]
+  let l:testing_lang_type = a:project_config[a:config_lines.testing_lang_type]
+  let l:testing_lang_std  = a:project_config[a:config_lines.testing_lang_std]
+  let l:std = (l:lang_type == "CPP")
+    \ ? l:lang_std
+    \ : (l:testing_lang_type == "CPP" ? l:testing_lang_std : b:cpp_fallback_std)
+  return '-std=c++' . l:std
+endfunction
+
+function! s:GetConfigCCompileStd(project_config, config_lines)
+  let l:lang_type         = a:project_config[a:config_lines.lang_type]
+  let l:lang_std          = a:project_config[a:config_lines.lang_std]
+  let l:testing_lang_type = a:project_config[a:config_lines.testing_lang_type]
+  let l:testing_lang_std  = a:project_config[a:config_lines.testing_lang_std]
+  let l:std = (l:lang_type == "C")
+    \ ? l:lang_std
+    \ : (l:testing_lang_type == "C" ? l:testing_lang_std : b:c_fallback_std)
+  return '-std=c' . l:std
+endfunction
+
+function! s:GetConfigTopLevelSrcDirs(project_config, config_lines)
+  let l:src_dirs     = split(a:project_config[a:config_lines.src_dirs], ":", 1)
+  let l:testing_dirs = split(a:project_config[a:config_lines.testing_src_dirs], ":", 1)
+  if (a:project_config[a:config_lines.testing_src_dirs] == "-")
+    return l:src_dirs
+  else
+    return (l:src_dirs + l:testing_dirs)
+  endif
+endfunction
+
+function! s:GetRecursedRelativeIncludePaths(project_config, config_lines)
+  let l:top_level_src_dirs = s:GetConfigTopLevelSrcDirs(a:project_config, a:config_lines)
+  let l:paths = []
+  for l:dir in l:top_level_src_dirs
+    let l:paths = l:paths + systemlist('find ' . l:dir . ' -type d | sed s/^//')
+  endfor
+  return l:paths
+endfunction
+
+function! s:SetVimIncludePaths(project_config, config_lines)
+  let l:include_paths = s:GetRecursedRelativeIncludePaths(a:project_config, a:config_lines)
+  let $CPATH = ""
+  let $C_INCLUDE_PATH = ""
+  let $CPLUS_INCLUDE_PATH = ""
+  for l:path in l:include_paths
+    let $CPATH .= getcwd() . '/' . l:path . ":"
+    let $C_INCLUDE_PATH .= getcwd() . '/' . l:path . ":"
+    let $CPLUS_INCLUDE_PATH .= getcwd() . '/' . l:path . ":"
+  endfor
+endfunction
+
+function! s:SetLinterSettings(project_config, config_lines)
+  let l:cpp_std = s:GetConfigCPPCompileStd(a:project_config, a:config_lines)
+  let l:defs = s:GetConfigCompileDefs(a:project_config, a:config_lines)
+  let l:warnings = s:GetConfigCompileWarnings(a:project_config, a:config_lines)
+  let g:ale_cpp_gcc_options          = l:cpp_std . ' ' . l:defs . ' ' . l:warnings
+  let g:ale_cpp_clang_options        = l:cpp_std . ' ' . l:defs . ' ' . l:warnings
+  let g:ale_cpp_clangcheck_options   = l:cpp_std . ' ' . l:defs . ' ' . l:warnings
+  let g:ale_cpp_clang_format_options = l:cpp_std . ' ' . l:defs . ' ' . l:warnings
+  let g:ale_cpp_clangtidy_options    = l:cpp_std . ' ' . l:defs . ' ' . l:warnings
+  let l:c_std = s:GetConfigCCompileStd(a:project_config, a:config_lines)
+  let g:ale_c_gcc_options            = l:c_std . ' ' . l:defs . ' ' . l:warnings
+  let g:ale_c_clang_options          = l:c_std . ' ' . l:defs . ' ' . l:warnings
+  let g:ale_c_clangcheck_options     = l:c_std . ' ' . l:defs . ' ' . l:warnings
+  let g:ale_c_clang_format_options   = l:c_std . ' ' . l:defs . ' ' . l:warnings
+  let g:ale_c_clangtidy_options      = l:c_std . ' ' . l:defs . ' ' . l:warnings
+endfunction
+
+function! s:WriteSettingsToCompletionFile(completion_file_name, project_config, config_lines)
+  let l:lang_type = a:project_config[a:config_lines.lang_type]
+  let l:cpp_compile_standard = s:GetConfigCPPCompileStd(a:project_config, a:config_lines)
+  let l:c_compile_standard = s:GetConfigCCompileStd(a:project_config, a:config_lines)
+  let l:project_compile_std = (l:lang_type == "CPP")
+    \ ? l:cpp_compile_standard
+    \ : l:c_compile_standard
+  call writefile([l:project_compile_std], a:completion_file_name)
+  let l:defs = s:GetConfigCompileDefs(a:project_config, a:config_lines)
+  call writefile(split(l:defs, " ", 0), a:completion_file_name, "a")
+  let l:warnings = s:GetConfigCompileWarnings(a:project_config, a:config_lines)
+  call writefile(split(l:warnings, " ", 0), a:completion_file_name, "a")
+  let l:include_paths = s:GetRecursedRelativeIncludePaths(a:project_config, a:config_lines)
+  for path in l:include_paths
+    call writefile(["-I" . path], a:completion_file_name, "a")
+  endfor
+endfunction
+
+function! s:Main()
+  let l:project_config = readfile(b:config_file_name)
+  call s:SetLinterSettings(l:project_config, b:config_lines)
+  call s:WriteSettingsToCompletionFile(b:completion_file_name, l:project_config, b:config_lines)
+  call s:SetVimIncludePaths(l:project_config, b:config_lines)
+endfunction
+
+call s:Main()
+
+EOF
+}
+
 generate_new_setup_files() {
   setup_file_generated='false'
   if [ "${generate_new_project_config}" = 'true' ]; then
@@ -483,6 +631,10 @@ generate_new_setup_files() {
   fi
   if [ "${generate_new_cmakelists}" = 'true' ]; then
     generate_cmakelists
+    setup_file_generated='true'
+  fi
+  if [ "${generate_new_vimrc}" = 'true' ]; then
+    generate_vimrc
     setup_file_generated='true'
   fi
   if [ "${setup_file_generated}" = 'true' ]; then
