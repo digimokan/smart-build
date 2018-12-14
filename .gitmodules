@@ -1,3 +1,6 @@
 [submodule "third_party/shunit2"]
 	path = third_party/shunit2
 	url = https://github.com/kward/shunit2
+[submodule "third_party/shlib"]
+	path = third_party/shlib
+	url = https://github.com/kward/shlib
