@@ -82,6 +82,9 @@ suite() {
 # LOAD TEST FRAMEWORK (MUST GO LAST)
 ################################################################################
 
+# zsh compatibility options
+export SHUNIT_PARENT=$0
+setopt shwordsplit
 # shellcheck disable=SC1091
 . "${PATH_TO_SHUNIT}"
 
