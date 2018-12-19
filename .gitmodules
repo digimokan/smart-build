@@ -4,3 +4,6 @@
 [submodule "third_party/shlib"]
 	path = third_party/shlib
 	url = https://github.com/kward/shlib
+[submodule "third_party/shunit-test-handler"]
+	path = third_party/shunit-test-handler
+	url = https://github.com/digimokan/shunit-test-handler
