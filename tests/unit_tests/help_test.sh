@@ -80,7 +80,7 @@ suite() {
 
 # zsh compatibility options
 export SHUNIT_PARENT=$0
-setopt shwordsplit
+setopt shwordsplit 2> /dev/null
 # shellcheck disable=SC1091
 . "${PATH_TO_SHUNIT}"
 
