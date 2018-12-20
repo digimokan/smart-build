@@ -34,12 +34,25 @@ projectConfigGenHelper() {
   cmd_output=$(${1})
   assertNull 'Generate .project_config is silent -->' "${cmd_output}"
   assertTrue 'Generate .project_config does generate it' '[ -e .project_config ]'
-  assertContains '.project_config has correct contents -->' "$(cat .project_config)" '# cmake project title'
-  assertContains '.project_config has correct contents -->' "$(cat .project_config)" '# EOF: FILE MUST END WITH THIS LAST LINE'
+  assertContains '.project_config has correct contents -->' "$(head -n 1 .project_config)" '# cmake project title'
+  assertContains '.project_config has correct contents -->' "$(tail -n 1 .project_config)" '# EOF: FILE MUST END WITH THIS LAST LINE'
   cmd_output=$(${1})
   exit_code=${?}
   assertContains 'Illegal overwrite .project_config has correct output -->' "${cmd_output}" '.project_config file already exists'
   assertEquals 'Illegal overwrite .project_config has correct exit code -->' "${exit_code}" 1
+}
+
+cmakeListsGenHelper() {
+  cmd_output=$(${1})
+  assertNull 'Generate CMakeLists.txt is silent -->' "${cmd_output}"
+  assertTrue 'Generate CMakeLists.txt does generate it' '[ -e CMakeLists.txt ]'
+  assertContains 'CMakeLists.txt has correct contents -->' "$(sed -n '2p' CMakeLists.txt)" '# REQUIRED COMMAND-LINE INPUTS'
+  assertContains 'CMakeLists.txt has correct contents -->' "$(tail -n 4 CMakeLists.txt)" "include_dir_and_recurse_subdirs(\${testing_source_dirs})"
+  assertContains 'CMakeLists.txt has correct contents -->' "$(tail -n 2 CMakeLists.txt)" "endif()"
+  cmd_output=$(${1})
+  exit_code=${?}
+  assertContains 'Illegal overwrite CMakeLists.txt has correct output -->' "${cmd_output}" 'CMakeLists.txt file already exists'
+  assertEquals 'Illegal overwrite CMakeLists.txt has correct exit code -->' "${exit_code}" 1
 }
 
 ################################################################################
@@ -54,6 +67,14 @@ projectConfigGenLong() {
   projectConfigGenHelper "./${EXEC_NAME} --generate-project-config"
 }
 
+cmakeListsGenShort() {
+  cmakeListsGenHelper "./${EXEC_NAME} -L"
+}
+
+cmakeListsGenLong() {
+  cmakeListsGenHelper "./${EXEC_NAME} --generate-cmakelists"
+}
+
 ################################################################################
 # TEST SUITE
 ################################################################################
@@ -65,6 +86,8 @@ suite() {
   else
     suite_addTest projectConfigGenShort
     suite_addTest projectConfigGenLong
+    suite_addTest cmakeListsGenShort
+    suite_addTest cmakeListsGenLong
   fi
 }
 
