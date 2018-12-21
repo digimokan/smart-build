@@ -248,7 +248,7 @@ CPP
 # language standard
 17
 # defs and system-include standards: space-separated, "-" if empty
--DGNU_SOURCE -_LARGEFILE64_SOURCE
+-DGNU_SOURCE -D_LARGEFILE64_SOURCE
 # warning levels: space-separated, "-" if empty
 -Wall -Wno-unused
 # top-level src dirs: colon-separated
@@ -262,7 +262,7 @@ CPP
 # testing language standard (N/A if building without -t/-T)
 17
 # testing top-level src dirs: colon-separated, "-" if none
-unit-tests:more-unit-tests
+tests
 # test-driver executable to build (N/A if building without -t/-T)
 my-test-driver
 # EOF: FILE MUST END WITH THIS LAST LINE
