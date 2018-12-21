@@ -65,16 +65,6 @@ suite() {
 }
 
 ################################################################################
-# BAD INVOCATION
-################################################################################
-
-# testMissingAllOptions() {
-#   cmd_output=$(./test_project/fd.sh)
-#   assertContains 'no options provided -->' "${cmd_output}" "USAGE"
-#   assertContains 'Basic print-usage help -->' "${cmd_output}" "OPTIONS"
-# }
-
-################################################################################
 # LOAD TEST FRAMEWORK (MUST GO LAST)
 ################################################################################
 
