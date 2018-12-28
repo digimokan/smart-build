@@ -242,7 +242,7 @@ generate_project_config() {
 # cmake project title
 my-project
 # cmake min version required
-3.12
+3.0.2
 # language type:"C" or "CPP"
 CPP
 # language standard
