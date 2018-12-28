@@ -4,7 +4,7 @@
 PATH_TO_SRC_DIR='../../src'
 #shellcheck source=../../tests
 PATH_TO_TESTS_DIR='../../tests'
-EXEC_NAME='fd.sh'
+EXEC_NAME='smart-build.sh'
 
 set_up() {
   mkdir test_project
