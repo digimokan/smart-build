@@ -21,9 +21,9 @@ print_usage() {
   echo '            [-x <file>]  [-q]'
   echo "  $(basename "${0}")  -d|-r|-w|-m  [-c|-C]  [-t|-T]  [-b <dir>]"
   echo '            [-p <file>]  [-e <file>|-E]  [-x <file>]  [-q]'
-  echo "  $(basename "${0}")  -P  [-L|-V]"
-  echo "  $(basename "${0}")  -L  [-P|-V]"
-  echo "  $(basename "${0}")  -V  [-P|-L]"
+  echo "  $(basename "${0}")  -P  [-L]  [-V]"
+  echo "  $(basename "${0}")  -L  [-P]  [-V]"
+  echo "  $(basename "${0}")  -V  [-P]  [-L]"
   echo 'OPTIONS:'
   echo '  -h, --help'
   echo '      print this help message'
