@@ -1,6 +1,6 @@
 # smart-build
 
-[![Release](https://img.shields.io/github/release/digimokan/smart-build.svg)](https://github.com/digimokan/smart-build/releases/latest "Latest Release")
+[![Release](https://img.shields.io/github/release/digimokan/smart-build.svg?label=release)](https://github.com/digimokan/smart-build/releases/latest "Latest Release Notes")
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?label=license)](LICENSE.txt "Project License")
 [![Build Status](https://img.shields.io/travis/com/digimokan/smart-build/master.svg?label=linux+build)](https://travis-ci.com/digimokan/smart-build "Build And Test Results From Master Branch")
 
