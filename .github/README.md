@@ -18,7 +18,7 @@ linting/completion.
 * [Sample Config File](#sample-config-file)
 * [Full Usage / Options](#full-usage--options)
 * [Examples](#examples)
-* [Todo](#todo)
+* [Contributing](#contributing)
 
 ## Motivation
 
@@ -271,12 +271,12 @@ OPTIONS:
 * Build and run tests, do not build main executable (overrides `.project_config`):
 
    ```bash
-   $ ./smart-build -tE
+   $ ./smart-build -dtE
    ```
 
-## Todo
+## Contributing
 
-* Unit-test the _smart-build_-generated `.vimrc`.
-* Reevaluate making `.project_config` a json file.
-* Set up testing and CI for FreeBSD.
+* Feel free to report a bug or propose a feature by opening an issue.
+* Follow the project's [Contributing](CONTRIBUTING.md) guidelines.
+* Respect the project's [Code Of Conduct](CODE_OF_CONDUCT.md).
 
