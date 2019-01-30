@@ -721,9 +721,9 @@ run_tests() {
   fi
 }
 
-move_execs() {
-  [ -e "${executable_name}" ] && mv "${executable_name}" ..
-  [ -e "${test_driver_name}" ] && mv "${test_driver_name}" ..
+copy_execs() {
+  [ -e "${executable_name}" ] && cp "${executable_name}" ..
+  [ -e "${test_driver_name}" ] && cp "${test_driver_name}" ..
 }
 
 build_and_test() {
@@ -736,7 +736,7 @@ build_and_test() {
   create_and_switch_to_build_dir
   build_project
   run_tests
-  move_execs
+  copy_execs
 }
 
 main() {
