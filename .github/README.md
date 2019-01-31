@@ -159,8 +159,8 @@ USAGE
 `smart-build.sh  -c|-C  [-b <dir>]  [-p <file>]  [-e <file>]`  
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `[-x <file>]  [-q]`
 
-`smart-build.sh  -d|-r|-w|-m  [-c|-C]  [-t|-T]  [-b <dir>]`  
-&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `[-p <file>]  [-e <file>|-E]  [-x <file>]  [-q]`
+`smart-build.sh  -d|-r|-w|-m  [-c|-C]  [-g|-l]  [-t|-T]`  
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; `[-b <dir>]  [-p <file>]  [-e <file>|-E]  [-x <file>]  [-q]`
 
 `smart-build.sh  -P  [-L]  [-V]`
 
@@ -190,6 +190,12 @@ OPTIONS:
 
 `-C, --clean-executables`  
 &nbsp; &nbsp; &nbsp; &nbsp; remove built program/testing executables
+
+`-g, --use-gnu-compiler`  
+&nbsp; &nbsp; &nbsp; &nbsp; use GNU gcc/g++ compiler and linker
+
+`-l, --use-llvm-compiler`  
+&nbsp; &nbsp; &nbsp; &nbsp; use LLVM clang/clang++ compiler and linker
 
 `-t, --make-and-run-tests`  
 &nbsp; &nbsp; &nbsp; &nbsp; make and run tests
@@ -254,6 +260,12 @@ OPTIONS:
 
    ```bash
    $ ./smart-build -cd
+   ```
+
+* Build and force use of LLVM compiler (instead of system's default compiler):
+
+   ```bash
+   $ ./smart-build -dl
    ```
 
 * Build in specified out-of-source _CMake_ build directory (default is `build`):

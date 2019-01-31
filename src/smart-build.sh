@@ -5,6 +5,9 @@ build_testing='uninitialized'         # build tests (on/off)
 executable_name='uninitialized'       # name of program main executable
 main_executable_src='uninitialized'   # name of src file with main exec code
 test_driver_name='uninitialized'      # name of test driver executable
+compiler_type='default'               # compiler to use (default/gnu/llvm/etc)
+compiler_c='none'                     # c compiler (non-default compiler_type)
+compiler_cpp='none'                   # cpp compiler (non-default compiler_type)
 project_config_file='.project_config' # read build-dir, executable names
 build_dir='build'                     # out-of-source cmake build dir
 clean='none'                          # clean executables and/or cmake cache
@@ -19,8 +22,8 @@ print_usage() {
   echo "  $(basename "${0}")  -h"
   echo "  $(basename "${0}")  -c|-C  [-b <dir>]  [-p <file>]  [-e <file>]"
   echo '            [-x <file>]  [-q]'
-  echo "  $(basename "${0}")  -d|-r|-w|-m  [-c|-C]  [-t|-T]  [-b <dir>]"
-  echo '            [-p <file>]  [-e <file>|-E]  [-x <file>]  [-q]'
+  echo "  $(basename "${0}")  -d|-r|-w|-m  [-c|-C]  [-g|-l]  [-t|-T]"
+  echo '            [-b <dir>]  [-p <file>]  [-e <file>|-E]  [-x <file>]  [-q]'
   echo "  $(basename "${0}")  -P  [-L]  [-V]"
   echo "  $(basename "${0}")  -L  [-P]  [-V]"
   echo "  $(basename "${0}")  -V  [-P]  [-L]"
@@ -39,6 +42,10 @@ print_usage() {
   echo '      remove built program/testing executables and build dir'
   echo '  -C, --clean-executables'
   echo '      remove built program/testing executables'
+  echo '  -g, --use-gnu-compiler'
+  echo '      use GNU gcc/g++ compiler and linker'
+  echo '  -l, --use-llvm-compiler'
+  echo '      use LLVM clang/clang++ compiler and linker'
   echo '  -t, --make-and-run-tests'
   echo '      make and run tests'
   echo '  -T, --make-tests'
@@ -71,7 +78,7 @@ print_error_msg() {
 }
 
 get_cmd_opts_and_args() {
-  while getopts ':hdrwmcCtTb:p:e:Ex:PLVq-:' option; do
+  while getopts ':hdrwmcCgltTb:p:e:Ex:PLVq-:' option; do
     case "${option}" in
       h)  handle_help ;;
       d)  handle_build_type_debug ;;
@@ -80,6 +87,8 @@ get_cmd_opts_and_args() {
       m)  handle_build_type_release_min_max ;;
       c)  handle_clean_all ;;
       C)  handle_clean_execs ;;
+      g)  handle_use_gnu_compiler ;;
+      l)  handle_use_llvm_compiler ;;
       t)  handle_make_and_run_tests ;;
       T)  handle_make_tests ;;
       b)  handle_build_dir "${OPTARG}" ;;
@@ -107,6 +116,10 @@ get_cmd_opts_and_args() {
             clean-all=*)            handle_illegal_option_arg "${OPTARG}" ;;
             clean-executables)      handle_clean_execs ;;
             clean-executables=*)    handle_illegal_option_arg "${OPTARG}" ;;
+            use-gnu-compiler)       handle_use_gnu_compiler ;;
+            use-gnu-compiler=*)     handle_illegal_option_arg "${OPTARG}" ;;
+            use-llvm-compiler)      handle_use_llvm_compiler ;;
+            use-llvm-compiler=*)    handle_illegal_option_arg "${OPTARG}" ;;
             make-and-run-tests)     handle_make_and_run_tests ;;
             make-and-run-tests=*)   handle_illegal_option_arg "${OPTARG}" ;;
             make-tests)             handle_make_tests ;;
@@ -171,6 +184,18 @@ handle_clean_all() {
 
 handle_clean_execs() {
   clean='execs'
+}
+
+handle_use_gnu_compiler() {
+  compiler_type='gnu'
+  compiler_c='gcc'
+  compiler_cpp='g++'
+}
+
+handle_use_llvm_compiler() {
+  compiler_type='llvm'
+  compiler_c='clang'
+  compiler_cpp='clang++'
 }
 
 handle_build_dir() {
@@ -690,13 +715,15 @@ create_and_switch_to_build_dir() {
 }
 
 build_project() {
-  cmake \
+  cmake --no-warn-unused-cli \
     -DCMAKE_BUILD_TYPE="${build_type}" \
     -DBUILD_TESTING="${build_testing}" \
     -Dproject_config_file="${project_config_file}" \
     -Dproject_source_main_exec="${main_executable_src}" \
     "$([ "${main_executable_src}" != '-' ] && printf "%s%s" "-Dproject_main_exec_to_build=" "${executable_name}" || echo '')" \
     "$([ "${build_testing}" = 'ON' ] && printf "%s%s" "-Dtesting_exec_to_build=" "${test_driver_name}" || echo '')" \
+    "$([ "${compiler_type}" != 'default' ] && printf "%s%s" "-DCMAKE_C_COMPILER=" "${compiler_c}" || echo '')" \
+    "$([ "${compiler_type}" != 'default' ] && printf "%s%s" "-DCMAKE_CXX_COMPILER=" "${compiler_cpp}" || echo '')" \
     ..
   cmake --build .
 }
