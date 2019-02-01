@@ -38,19 +38,21 @@ writeConfigFiles() {
 makeAndRunTests() {
   cmd_output=$(${1})
   exit_code=${?}
-  assertContains 'make-and-run-tests output' "${cmd_output}" '100% tests passed, 0 tests failed'
-  assertTrue 'make-and-run-tests exec' '[ -e my-exec ]'
-  assertTrue 'make-and-run-tests test driver' '[ -e my-test-driver ]'
-  assertEquals 'make-and-run-tests exit code' "${exit_code}" 0
+  assertContains 'makeAndRunTests unit tests' "${cmd_output}" '[doctest] Status: SUCCESS!'
+  assertNotContains 'makeAndRunTests ctest' "${cmd_output}" '% tests passed, '
+  assertTrue 'makeAndRunTests exec' '[ -e my-exec ]'
+  assertTrue 'makeAndRunTests test driver' '[ -e my-test-driver ]'
+  assertEquals 'makeAndRunTests exit code' "${exit_code}" 0
 }
 
 makeTests() {
   cmd_output=$(${1})
   exit_code=${?}
-  assertNotContains 'make-and-run-tests output' "${cmd_output}" '100% tests passed, 0 tests failed'
-  assertTrue 'make-and-run-tests exec' '[ -e my-exec ]'
-  assertTrue 'make-and-run-tests test driver' '[ -e my-test-driver ]'
-  assertEquals 'make-and-run-tests exit code' "${exit_code}" 0
+  assertNotContains 'makeTests unit tests' "${cmd_output}" '[doctest] Status: SUCCESS!'
+  assertNotContains 'makeTests ctest' "${cmd_output}" '% tests passed, '
+  assertTrue 'makeTests exec' '[ -e my-exec ]'
+  assertTrue 'makeTests test driver' '[ -e my-test-driver ]'
+  assertEquals 'makeTests exit code' "${exit_code}" 0
 }
 
 ################################################################################
