@@ -44,10 +44,11 @@ noBuildExecFromConfigFileWithTests() {
   sed -i '18s/.*/-/' .project_config
   cmd_output=$(./${EXEC_NAME} -dt)
   exit_code=${?}
-  assertContains 'no-build-exec from config file with tests output' "${cmd_output}" '100% tests passed, 0 tests failed'
-  assertTrue 'no-build-exec from config file with tests exec' '[ ! -e my-exec ]'
-  assertTrue 'no-build-exec from config file with tests test driver' '[ -e my-test-driver ]'
-  assertEquals 'no-build-exec from config file with tests exit code' "${exit_code}" 0
+  assertContains 'noBuildExecFromConfigFileWithTests unit tests' "${cmd_output}" '[doctest] Status: SUCCESS!'
+  assertNotContains 'noBuildExecFromConfigFileWithTests ctest' "${cmd_output}" '% tests passed, '
+  assertTrue 'noBuildExecFromConfigFileWithTests exec' '[ ! -e my-exec ]'
+  assertTrue 'noBuildExecFromConfigFileWithTests test driver' '[ -e my-test-driver ]'
+  assertEquals 'noBuildExecFromConfigFileWithTests exit code' "${exit_code}" 0
 }
 
 noBuildExecFromConfigFileWithoutTests() {
@@ -55,10 +56,10 @@ noBuildExecFromConfigFileWithoutTests() {
   sed -i '18s/.*/-/' .project_config
   cmd_output=$(./${EXEC_NAME} -d)
   exit_code=${?}
-  assertContains 'no-build-exec from config file without tests output' "${cmd_output}" 'Built target user_lib'
-  assertTrue 'no-build-exec from config file without tests exec' '[ ! -e my-exec ]'
-  assertTrue 'no-build-exec from config file without tests test driver' '[ ! -e my-test-driver ]'
-  assertEquals 'no-build-exec from config file without tests exit code' "${exit_code}" 0
+  assertContains 'noBuildExecFromConfigFileWithoutTests output' "${cmd_output}" 'Built target user_lib'
+  assertTrue 'noBuildExecFromConfigFileWithoutTests exec' '[ ! -e my-exec ]'
+  assertTrue 'noBuildExecFromConfigFileWithoutTests test driver' '[ ! -e my-test-driver ]'
+  assertEquals 'noBuildExecFromConfigFileWithoutTests exit code' "${exit_code}" 0
 }
 
 noBuildExecFromConfigFileAndCmdOpt() {
@@ -66,38 +67,38 @@ noBuildExecFromConfigFileAndCmdOpt() {
   sed -i '18s/.*/-/' .project_config
   cmd_output=$(./${EXEC_NAME} -dE)
   exit_code=${?}
-  assertContains 'no-build-exec from config file and cmd opt output' "${cmd_output}" 'Built target user_lib'
-  assertTrue 'no-build-exec from config file and cmd opt exec' '[ ! -e my-exec ]'
-  assertTrue 'no-build-exec from config file and cmd opt test driver' '[ ! -e my-test-driver ]'
-  assertEquals 'no-build-exec from config file and cmd opt exit code' "${exit_code}" 0
+  assertContains 'noBuildExecFromConfigFileAndCmdOpt output' "${cmd_output}" 'Built target user_lib'
+  assertTrue 'noBuildExecFromConfigFileAndCmdOpt exec' '[ ! -e my-exec ]'
+  assertTrue 'noBuildExecFromConfigFileAndCmdOpt test driver' '[ ! -e my-test-driver ]'
+  assertEquals 'noBuildExecFromConfigFileAndCmdOpt exit code' "${exit_code}" 0
 }
 
 noBuildExecFromConfigFileBadInput() {
   sed -i '18s/.*/-/' .project_config
   cmd_output=$(./${EXEC_NAME} -d)
   exit_code=${?}
-  assertContains 'no-build-exec from config file bad input output' "${cmd_output}" 'main executable source file specified, but exec name missing'
-  assertTrue 'no-build-exec from config file bad input exec' '[ ! -e my-exec ]'
-  assertTrue 'no-build-exec from config file bad input test driver' '[ ! -e my-test-driver ]'
-  assertEquals 'no-build-exec from config file bad input exit code' "${exit_code}" 2
+  assertContains 'noBuildExecFromConfigFileBadInput output' "${cmd_output}" 'main executable source file specified, but exec name missing'
+  assertTrue 'noBuildExecFromConfigFileBadInput exec' '[ ! -e my-exec ]'
+  assertTrue 'noBuildExecFromConfigFileBadInput test driver' '[ ! -e my-test-driver ]'
+  assertEquals 'noBuildExecFromConfigFileBadInput exit code' "${exit_code}" 1
 }
 
 noBuildExecFromCmdOptShort() {
   cmd_output=$(./${EXEC_NAME} -d -E)
   exit_code=${?}
-  assertContains 'no-build-exec from cmd opt short output' "${cmd_output}" 'Built target user_lib'
-  assertTrue 'no-build-exec from cmd opt short exec' '[ ! -e my-exec ]'
-  assertTrue 'no-build-exec from cmd opt short test driver' '[ ! -e my-test-driver ]'
-  assertEquals 'no-build-exec from cmd opt short exit code' "${exit_code}" 0
+  assertContains 'noBuildExecFromCmdOptShort output' "${cmd_output}" 'Built target user_lib'
+  assertTrue 'noBuildExecFromCmdOptShort exec' '[ ! -e my-exec ]'
+  assertTrue 'noBuildExecFromCmdOptShort test driver' '[ ! -e my-test-driver ]'
+  assertEquals 'noBuildExecFromCmdOptShort exit code' "${exit_code}" 0
 }
 
 noBuildExecFromCmdOptLong() {
   cmd_output=$(./${EXEC_NAME} -d --no-build-executable)
   exit_code=${?}
-  assertContains 'no-build-exec from cmd opt long output' "${cmd_output}" 'Built target user_lib'
-  assertTrue 'no-build-exec from cmd opt long exec' '[ ! -e my-exec ]'
-  assertTrue 'no-build-exec from cmd opt long test driver' '[ ! -e my-test-driver ]'
-  assertEquals 'no-build-exec from cmd opt long exit code' "${exit_code}" 0
+  assertContains 'noBuildExecFromCmdOptLong output' "${cmd_output}" 'Built target user_lib'
+  assertTrue 'noBuildExecFromCmdOptLong exec' '[ ! -e my-exec ]'
+  assertTrue 'noBuildExecFromCmdOptLong test driver' '[ ! -e my-test-driver ]'
+  assertEquals 'noBuildExecFromCmdOptLong exit code' "${exit_code}" 0
 }
 
 ################################################################################
