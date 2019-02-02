@@ -68,6 +68,12 @@ print_usage() {
   echo '      generate template .vimrc file'
   echo '  -q, --quiet-mode'
   echo '      quiet mode'
+  echo 'EXIT CODES:'
+  echo '    0  ok'
+  echo '    1  usage, arguments, or options error'
+  echo '    2  build error'
+  echo '    3  test error'
+  echo '  255  unknown error'
   exit "${1}"
 }
 
@@ -703,7 +709,7 @@ clean_project() {
 
 check_build_type() {
   if [ "${build_type}" = 'uninitialized' ] && [ "${clean}" = 'none' ]; then
-    print_error_msg "no build type set with -d|-r|-w|-m" 2
+    print_error_msg "no build type set with -d|-r|-w|-m" 1
   elif [ "${build_type}" = 'uninitialized' ] && [ "${clean}" != 'none' ]; then
     exit 0
   fi
@@ -714,7 +720,7 @@ create_and_switch_to_build_dir() {
   cd "${build_dir}" || exit
 }
 
-build_project() {
+run_cmake_configure() {
   cmake --no-warn-unused-cli \
     -DCMAKE_BUILD_TYPE="${build_type}" \
     -DBUILD_TESTING="${build_testing}" \
@@ -725,12 +731,24 @@ build_project() {
     "$([ "${compiler_type}" != 'default' ] && printf "%s%s" "-DCMAKE_C_COMPILER=" "${compiler_c}" || echo '')" \
     "$([ "${compiler_type}" != 'default' ] && printf "%s%s" "-DCMAKE_CXX_COMPILER=" "${compiler_cpp}" || echo '')" \
     ..
+  exit_code=${?}
+  [ "${exit_code}" != 0 ] && exit 2
+}
+
+run_cmake_build() {
   cmake --build .
+  exit_code=${?}
+  [ "${exit_code}" != 0 ] && exit 2
+}
+
+build_project() {
+  run_cmake_configure
+  run_cmake_build
 }
 
 check_main_exec() {
   if [ "${executable_name}" = '-' ] && [ "${main_executable_src}" != '-' ]; then
-    print_error_msg "main executable source file specified, but exec name missing" 2
+    print_error_msg "main executable source file specified, but exec name missing" 1
   fi
 }
 
@@ -742,9 +760,18 @@ check_tests() {
   fi
 }
 
+run_unit_tests() {
+  "./${test_driver_name}"
+  exit_code=${?}
+  if [ "${exit_code}" != 0 ]; then
+    copy_execs
+    exit 3
+  fi
+}
+
 run_tests() {
   if [ "${tests}" = 'make_and_run_tests' ]; then
-    ctest
+    run_unit_tests
   fi
 }
 

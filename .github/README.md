@@ -152,7 +152,7 @@ my-test-driver
 
 ## Full Usage / Options
 
-USAGE
+USAGE:
 
 `smart-build.sh  -h`
 
@@ -229,6 +229,18 @@ OPTIONS:
 
 `-q, --quiet-mode`  
 &nbsp; &nbsp; &nbsp; &nbsp; quiet mode
+
+EXIT CODES:
+
+&nbsp; &nbsp; &nbsp; &nbsp; `0` &nbsp; &nbsp; ok
+
+&nbsp; &nbsp; &nbsp; &nbsp; `1` &nbsp; &nbsp; usage, arguments, or options error
+
+&nbsp; &nbsp; &nbsp; &nbsp; `2` &nbsp; &nbsp; build error
+
+&nbsp; &nbsp; &nbsp; &nbsp; `3` &nbsp; &nbsp; test error
+
+&nbsp; &nbsp; `255` &nbsp; &nbsp; unknown error
 
 ## Examples
 

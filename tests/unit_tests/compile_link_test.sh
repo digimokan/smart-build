@@ -44,6 +44,10 @@ buildWithoutTests() {
   exit_code=${?}
   assertContains 'buildWithoutTests linking exec' "${cmd_output}" 'Linking CXX executable my-exec'
   assertContains 'buildWithoutTests building exec' "${cmd_output}" 'Built target my-exec'
+  assertNotContains 'buildWithoutTests linking test-driver' "${cmd_output}" 'Linking CXX executable my-test-driver'
+  assertNotContains 'buildWithoutTests building test-driver' "${cmd_output}" 'Built target my-test-driver'
+  assertNotContains 'buildWithoutTests unit tests' "${cmd_output}" '[doctest] Status: SUCCESS!'
+  assertNotContains 'buildWithoutTests ctest' "${cmd_output}" '% tests passed, '
   assertTrue 'buildWithoutTests exec exists' '[ -e my-exec ]'
   assertFalse 'buildWithoutTests test-driver exists' '[ -e my-test-driver ]'
   assertEquals 'buildWithoutTests exit code' "${exit_code}" 0
@@ -53,11 +57,15 @@ repeatBuildWithoutTests() {
   cmd_output=$(./${EXEC_NAME} -d)
   cmd_output=$(./${EXEC_NAME} -d)
   exit_code=${?}
-  assertNotContains 'buildWithoutTests linking exec' "${cmd_output}" 'Linking CXX executable my-exec'
-  assertContains 'buildWithoutTests building exec' "${cmd_output}" 'Built target my-exec'
-  assertTrue 'buildWithoutTests exec exists' '[ -e my-exec ]'
-  assertFalse 'buildWithoutTests test-driver exists' '[ -e my-test-driver ]'
-  assertEquals 'buildWithoutTests exit code' "${exit_code}" 0
+  assertNotContains 'repeatBuildWithoutTests linking exec' "${cmd_output}" 'Linking CXX executable my-exec'
+  assertContains 'repeatBuildWithoutTests building exec' "${cmd_output}" 'Built target my-exec'
+  assertNotContains 'repeatBuildWithoutTests linking test-driver' "${cmd_output}" 'Linking CXX executable my-test-driver'
+  assertNotContains 'repeatBuildWithoutTests building test-driver' "${cmd_output}" 'Built target my-test-driver'
+  assertNotContains 'repeatBuildWithoutTests unit tests' "${cmd_output}" '[doctest] Status: SUCCESS!'
+  assertNotContains 'repeatBuildWithoutTests ctest' "${cmd_output}" '% tests passed, '
+  assertTrue 'repeatBuildWithoutTests exec exists' '[ -e my-exec ]'
+  assertFalse 'repeatBuildWithoutTests test-driver exists' '[ -e my-test-driver ]'
+  assertEquals 'repeatBuildWithoutTests exit code' "${exit_code}" 0
 }
 
 buildWithTests() {
@@ -67,7 +75,8 @@ buildWithTests() {
   assertContains 'buildWithTests building exec' "${cmd_output}" 'Built target my-exec'
   assertContains 'buildWithTests linking test-driver' "${cmd_output}" 'Linking CXX executable my-test-driver'
   assertContains 'buildWithTests building test-driver' "${cmd_output}" 'Built target my-test-driver'
-  assertContains 'buildWithTests tests passed' "${cmd_output}" '100% tests passed, 0 tests failed'
+  assertContains 'buildWithTests unit tests' "${cmd_output}" '[doctest] Status: SUCCESS!'
+  assertNotContains 'buildWithTests ctest' "${cmd_output}" '% tests passed, '
   assertTrue 'buildWithTests exec exists' '[ -e my-exec ]'
   assertTrue 'buildWithTests test-driver exists' '[ -e my-test-driver ]'
   assertEquals 'buildWithTests exit code' "${exit_code}" 0
@@ -81,7 +90,8 @@ repeatBuildWithTests() {
   assertContains 'repeatBuildWithTests building exec' "${cmd_output}" 'Built target my-exec'
   assertNotContains 'repeatBuildWithTests linking test-driver' "${cmd_output}" 'Linking CXX executable my-test-driver'
   assertContains 'repeatBuildWithTests building test-driver' "${cmd_output}" 'Built target my-test-driver'
-  assertContains 'repeatBuildWithTests tests passed' "${cmd_output}" '100% tests passed, 0 tests failed'
+  assertContains 'repeatBuildWithTests unit tests' "${cmd_output}" '[doctest] Status: SUCCESS!'
+  assertNotContains 'repeatBuildWithTests ctest' "${cmd_output}" '% tests passed, '
   assertTrue 'repeatBuildWithTests exec exists' '[ -e my-exec ]'
   assertTrue 'repeatBuildWithTests test-driver exists' '[ -e my-test-driver ]'
   assertEquals 'repeatBuildWithTests exit code' "${exit_code}" 0
@@ -94,7 +104,8 @@ buildTestsOnly() {
   assertNotContains 'buildTestsOnly building exec' "${cmd_output}" 'Built target my-exec'
   assertContains 'buildTestsOnly linking test-driver' "${cmd_output}" 'Linking CXX executable my-test-driver'
   assertContains 'buildTestsOnly building test-driver' "${cmd_output}" 'Built target my-test-driver'
-  assertContains 'buildTestsOnly tests passed' "${cmd_output}" '100% tests passed, 0 tests failed'
+  assertContains 'buildTestsOnly unit tests' "${cmd_output}" '[doctest] Status: SUCCESS!'
+  assertNotContains 'buildTestsOnly ctest' "${cmd_output}" '% tests passed, '
   assertFalse 'buildTestsOnly exec exists' '[ -e my-exec ]'
   assertTrue 'buildTestsOnly test-driver exists' '[ -e my-test-driver ]'
   assertEquals 'buildTestsOnly exit code' "${exit_code}" 0
@@ -108,7 +119,8 @@ repeatBuildTestsOnly() {
   assertNotContains 'repeatBuildTestsOnly building exec' "${cmd_output}" 'Built target my-exec'
   assertNotContains 'repeatBuildTestsOnly linking test-driver' "${cmd_output}" 'Linking CXX executable my-test-driver'
   assertContains 'repeatBuildTestsOnly building test-driver' "${cmd_output}" 'Built target my-test-driver'
-  assertContains 'repeatBuildTestsOnly tests passed' "${cmd_output}" '100% tests passed, 0 tests failed'
+  assertContains 'repeatBuildTestsOnly unit tests' "${cmd_output}" '[doctest] Status: SUCCESS!'
+  assertNotContains 'repeatBuildTestsOnly ctest' "${cmd_output}" '% tests passed, '
   assertFalse 'repeatBuildTestsOnly exec exists' '[ -e my-exec ]'
   assertTrue 'repeatBuildTestsOnly test-driver exists' '[ -e my-test-driver ]'
   assertEquals 'repeatBuildTestsOnly exit code' "${exit_code}" 0

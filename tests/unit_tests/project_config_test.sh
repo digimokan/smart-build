@@ -37,12 +37,13 @@ alternateProjectConfigHelper() {
   sed -i '26s/.*/alt-test-driver/' .alt_project_config
   cmd_output=$(${1})
   exit_code=${?}
-  assertTrue 'Basic .project_config builds and tests' '[ ! -e my-exec ]'
-  assertTrue 'Basic .project_config builds and tests' '[ ! -e my-test-driver ]'
-  assertTrue 'Basic .project_config builds and tests' '[ -e alt-exec ]'
-  assertTrue 'Basic .project_config builds and tests' '[ -e alt-test-driver ]'
-  assertContains 'Basic .project_config builds and tests' "${cmd_output}" '100% tests passed, 0 tests failed'
-  assertEquals 'Basic .project_config builds and tests' "${exit_code}" 0
+  assertFalse 'alternateProjectConfigHelper exec exists' '[ -e my-exec ]'
+  assertFalse 'alternateProjectConfigHelper test-driver exists' '[ -e my-test-driver ]'
+  assertTrue 'alternateProjectConfigHelper alt-exec exists' '[ -e alt-exec ]'
+  assertTrue 'alternateProjectConfigHelper alt-test-driver exists' '[ -e alt-test-driver ]'
+  assertContains 'alternateProjectConfigHelper unit tests' "${cmd_output}" '[doctest] Status: SUCCESS!'
+  assertNotContains 'alternateProjectConfigHelper ctest' "${cmd_output}" '% tests passed, '
+  assertEquals 'alternateProjectConfigHelper exit code' "${exit_code}" 0
 }
 
 writeConfigFiles() {
@@ -56,18 +57,19 @@ writeConfigFiles() {
 missingProjectConfig() {
   cmd_output=$(./${EXEC_NAME})
   exit_code=${?}
-  assertContains 'Invocation with missing .project_config' "${cmd_output}" 'could not open project config file ".project_config"'
-  assertEquals 'Invocation with missing .project_config' "${exit_code}" 1
+  assertContains 'missingProjectConfig output' "${cmd_output}" 'could not open project config file ".project_config"'
+  assertEquals 'missingProjectConfig exit code' "${exit_code}" 1
 }
 
 basicProjectConfigBuildsAndTests() {
   writeConfigFiles
   cmd_output=$(./${EXEC_NAME} --build-type-debug --make-and-run-tests)
   exit_code=${?}
-  assertTrue 'Basic .project_config builds and tests' '[ -e my-exec ]'
-  assertTrue 'Basic .project_config builds and tests' '[ -e my-test-driver ]'
-  assertContains 'Basic .project_config builds and tests' "${cmd_output}" '100% tests passed, 0 tests failed'
-  assertEquals 'Basic .project_config builds and tests' "${exit_code}" 0
+  assertTrue 'basicProjectConfigBuildsAndTests exec exists' '[ -e my-exec ]'
+  assertTrue 'basicProjectConfigBuildsAndTests test driver exists' '[ -e my-test-driver ]'
+  assertContains 'basicProjectConfigBuildsAndTests unit tests' "${cmd_output}" '[doctest] Status: SUCCESS!'
+  assertNotContains 'basicProjectConfigBuildsAndTests ctest' "${cmd_output}" '% tests passed, '
+  assertEquals 'basicProjectConfigBuildsAndTests exit code' "${exit_code}" 0
 }
 
 alternateProjectConfigShort() {
