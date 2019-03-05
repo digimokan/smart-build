@@ -36,14 +36,16 @@ writeConfigFiles() {
 }
 
 buildTypesHelper() {
-  cmd_output=$(${1})
+  cmd_output=$(${1} 2>&1)
   exit_code=${?}
   assertContains 'build-type output' "${cmd_output}" 'Built target my-exec'
+  assertNotContains 'build type unused var warn' "${cmd_output}" 'Manually-specified variables were not used by the project'
   assertTrue 'build-type main exec' '[ -e my-exec ]'
   assertEquals 'build-type exit code' "${exit_code}" 0
   cmd_output=$(${1})
   exit_code=${?}
   assertContains 'repeat build-type output' "${cmd_output}" 'Built target my-exec'
+  assertNotContains 'repeat build type unused var warn' "${cmd_output}" 'Manually-specified variables were not used by the project'
   assertTrue 'repeat build-type main exec' '[ -e my-exec ]'
   assertEquals 'repeat build-type exit code' "${exit_code}" 0
 }

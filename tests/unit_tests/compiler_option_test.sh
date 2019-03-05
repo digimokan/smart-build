@@ -36,17 +36,19 @@ writeConfigFiles() {
 }
 
 useGnuCompilerHelper() {
-  cmd_output=$(${1})
+  cmd_output=$(${1} 2>&1)
   exit_code=${?}
   assertContains 'useGnuCompilerHelper compiler id' "${cmd_output}" 'The CXX compiler identification is GNU'
+  assertNotContains 'useGnuCompilerHelper unused var warn' "${cmd_output}" 'Manually-specified variables were not used by the project'
   assertTrue 'useGnuCompilerHelper exec exists' '[ -e my-exec ]'
   assertEquals 'useGnuCompilerHelper exit code' "${exit_code}" 0
 }
 
 useLlvmCompilerHelper() {
-  cmd_output=$(${1})
+  cmd_output=$(${1} 2>&1)
   exit_code=${?}
   assertContains 'useLlvmCompilerHelper compiler id' "${cmd_output}" 'The CXX compiler identification is Clang'
+  assertNotContains 'useLlvmCompilerHelper unused var warn' "${cmd_output}" 'Manually-specified variables were not used by the project'
   assertTrue 'useLlvmCompilerHelper exec exists' '[ -e my-exec ]'
   assertEquals 'useLlvmCompilerHelper exit code' "${exit_code}" 0
 }

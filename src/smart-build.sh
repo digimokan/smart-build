@@ -411,6 +411,13 @@ cmake_minimum_required(VERSION "${project_cmake_version_req}")
 project("${project_cmake_title}" NONE)
 
 ################################################################################
+# COMPILER
+################################################################################
+
+find_program(USER_C_COMPILER_SPECIFIED NAMES ${CMAKE_C_COMPILER})
+find_program(USER_CPP_COMPILER_SPECIFIED NAMES ${CMAKE_CXX_COMPILER})
+
+################################################################################
 # CMAKE LANGUAGE SUPPORT CHECK
 ################################################################################
 
@@ -721,7 +728,7 @@ create_and_switch_to_build_dir() {
 }
 
 run_cmake_configure() {
-  cmake --no-warn-unused-cli \
+  cmake \
     -DCMAKE_BUILD_TYPE="${build_type}" \
     -DBUILD_TESTING="${build_testing}" \
     -Dproject_config_file="${project_config_file}" \
