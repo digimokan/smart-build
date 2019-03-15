@@ -16,6 +16,7 @@ quiet_mode='off'                      # silence all output except errors
 generate_new_project_config='false'   # gen new .project_config file
 generate_new_cmakelists='false'       # gen new CMakeLists.txt file
 generate_new_vimrc='false'            # gen new .vimrc file
+compile_db='compile_commands.json'    # CMake-produced db used by various tools
 
 print_usage() {
   echo 'USAGE:'
@@ -453,6 +454,13 @@ endif()
 add_library(user_lib ${project_sources})
 
 ################################################################################
+# COMPILATION DATABASE
+################################################################################
+
+# generate compile_commands.json in build directory
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+################################################################################
 # LINK LIBS --> EXECUTABLES
 ################################################################################
 
@@ -771,7 +779,7 @@ run_unit_tests() {
   "./${test_driver_name}"
   exit_code=${?}
   if [ "${exit_code}" != 0 ]; then
-    copy_execs
+    copy_built_files
     exit 3
   fi
 }
@@ -782,9 +790,11 @@ run_tests() {
   fi
 }
 
-copy_execs() {
+copy_built_files() {
   [ -e "${executable_name}" ] && cp "${executable_name}" ..
   [ -e "${test_driver_name}" ] && cp "${test_driver_name}" ..
+  [ -e "${compile_db}" ] && cp "${compile_db}" ..
+
 }
 
 build_and_test() {
@@ -797,7 +807,7 @@ build_and_test() {
   create_and_switch_to_build_dir
   build_project
   run_tests
-  copy_execs
+  copy_built_files
 }
 
 main() {

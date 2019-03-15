@@ -39,42 +39,26 @@ writeConfigFiles() {
 # UNIT TESTS
 ################################################################################
 
-badCmakeConfigure() {
-  sed -i '16s/main/bad_main/' .project_config
-  cmd_output=$(./${EXEC_NAME} -dt 2>&1)
+buildOnly() {
+  cmd_output=$(./${EXEC_NAME} -d 2>&1)
   exit_code=${?}
-  assertContains 'badCmakeConfigure cmake error' "${cmd_output}" 'CMake Error at CMakeLists.txt'
-  assertNotContains 'badCmakeConfigure linking exec' "${cmd_output}" 'Linking CXX executable my-exec'
-  assertNotContains 'badCmakeConfigure building exec' "${cmd_output}" 'Built target my-exec'
-  assertNotContains 'badCmakeConfigure unit tests' "${cmd_output}" '[doctest] Status'
-  assertFalse 'badCmakeConfigure exec exists' '[ -e my-exec ]'
-  assertFalse 'badCmakeConfigure test-driver exists' '[ -e my-test-driver ]'
-  assertEquals 'badCmakeConfigure exit code' "${exit_code}" 2
+  assertContains 'buildOnly linking exec' "${cmd_output}" 'Linking CXX executable my-exec'
+  assertContains 'buildOnly building exec' "${cmd_output}" 'Built target my-exec'
+  assertTrue 'buildOnly compile db exists' '[ -e 'compile_commands.json' ]'
+  assertTrue 'buildOnly exec exists' '[ -e my-exec ]'
+  assertEquals 'buildOnly exit code' "${exit_code}" 0
 }
 
-badCmakeBuild() {
-  sed -i '2s/Hello/Yello/' src/somea/Hello.cpp
+buildAndTest() {
   cmd_output=$(./${EXEC_NAME} -dt 2>&1)
   exit_code=${?}
-  assertContains 'badCmakeBuild cmake error' "${cmd_output}" 'compilation terminated'
-  assertNotContains 'badCmakeBuild linking exec' "${cmd_output}" 'Linking CXX executable my-exec'
-  assertNotContains 'badCmakeBuild building exec' "${cmd_output}" 'Built target my-exec'
-  assertNotContains 'badCmakeBuild unit tests' "${cmd_output}" '[doctest] Status'
-  assertFalse 'badCmakeBuild exec exists' '[ -e my-exec ]'
-  assertFalse 'badCmakeBuild test-driver exists' '[ -e my-test-driver ]'
-  assertEquals 'badCmakeBuild exit code' "${exit_code}" 2
-}
-
-badUnitTestResults() {
-  sed -i '8s/CHECK_NE/CHECK_EQ/' tests/unit_tests/Goodbye_test.cpp
-  cmd_output=$(./${EXEC_NAME} -dt 2>&1)
-  exit_code=${?}
-  assertContains 'badUnitTestResults linking exec' "${cmd_output}" 'Linking CXX executable my-exec'
-  assertContains 'badUnitTestResults building exec' "${cmd_output}" 'Built target my-exec'
-  assertContains 'badUnitTestResults unit tests' "${cmd_output}" '[doctest] Status: FAILURE!'
-  assertTrue 'badUnitTestResults exec exists' '[ -e my-exec ]'
-  assertTrue 'badUnitTestResults test-driver exists' '[ -e my-test-driver ]'
-  assertEquals 'badUnitTestResults exit code' "${exit_code}" 3
+  assertContains 'buildAndTest linking exec' "${cmd_output}" 'Linking CXX executable my-exec'
+  assertContains 'buildAndTest building exec' "${cmd_output}" 'Built target my-exec'
+  assertContains 'buildAndTest unit tests' "${cmd_output}" '[doctest] Status: SUCCESS'
+  assertTrue 'buildAndTest compile db exists' '[ -e compile_commands.json ]'
+  assertTrue 'buildAndTest exec exists' '[ -e my-exec ]'
+  assertTrue 'buildAndTest test-driver exists' '[ -e my-test-driver ]'
+  assertEquals 'buildAndTest exit code' "${exit_code}" 0
 }
 
 ################################################################################
@@ -86,9 +70,8 @@ suite() {
   if [ "${unit_test_function}" != ''  ] && [ "$( type -t "${unit_test_function}" )" = "function" ]; then
     suite_addTest "${unit_test_function}"
   else
-    suite_addTest badCmakeConfigure
-    suite_addTest badCmakeBuild
-    suite_addTest badUnitTestResults
+    suite_addTest buildOnly
+    suite_addTest buildAndTest
   fi
 }
 
